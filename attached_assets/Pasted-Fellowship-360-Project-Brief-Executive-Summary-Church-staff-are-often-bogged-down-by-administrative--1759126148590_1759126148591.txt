@@ -1,0 +1,119 @@
+Fellowship 360 Project Brief
+Executive Summary
+Church staff are often bogged down by administrative tasks, pulling focus away from ministry. Fellowship 360 solves this by pairing an AI-powered software ecosystem with hands-on support. Offered as a "done-with-you" or fully managed solution, we ensure churches can leverage advanced technology without the technical burden. The ecosystem is built around "Grace," a conversational AI secretary integrated into a modern CRM to automate calls, messages, and scheduling. This combination of an AI-first platform and expert partnership provides a uniquely effective and supportive alternative to self-managed tools like Planning Center and Tithe.ly.
+
+Problem Statement
+Many churches, particularly those with small teams or volunteer-led operations, face a significant capacity gap in managing day-to-day administration. Critical tasks like consistent member follow-up, new visitor re-engagement, and handling inbound communications often fall through the cracks—not from a lack of care, but from a lack of hands.
+
+This problem is compounded by existing church management software and CRMs, which are often rigid and culturally misaligned. They impose corporate-style workflows that clash with the relational, community-centric nature of church operations, a disconnect felt acutely in many Black churches. As a result, staff are stretched thin, potential connections within the congregation are lost, and the church's ability to minister effectively is hampered by administrative friction and inadequate tools.
+
+Proposed Solution
+Fellowship 360 is a unified, AI-powered ecosystem paired with a supportive agency model to provide a comprehensive solution for church administration and engagement. The platform is designed to be flexible and culturally aligned with the relational needs of churches.
+
+The heart of the system is the 360 CRM, which is deeply integrated with Grace, a conversational AI assistant that acts as a virtual administrator. This central hub will be supported by a suite of interconnected, AI-enhanced applications:
+
+360 Finance: Uses AI to assist with donation forms, automate bookkeeping, and provide financial forecasting.
+
+360 Marketing: Includes a website builder and an AI-powered content assistant that suggests social media posts and optimizes outreach calendars.
+
+360 Funnels & LMS: Manages outreach and educational programs with AI-driven analytics to personalize learning paths and improve engagement.
+
+360 Community: A dedicated application using AI to foster member connection by identifying engagement trends and suggesting potential community groups.
+
+360 Staff Chat: A secure, internal communication tool with an AI assistant to summarize conversations and create action items.
+
+Delivered as a "done-with-you" or fully managed service, Fellowship 360 provides not just the tools, but the partnership and training needed to ensure successful adoption, making advanced technology accessible and effective for churches of any size.
+
+Target Users
+Primary User Segment: The Church Administrator: The central point of contact, often stretched thin, who needs tools to efficiently manage operations so the pastoral staff can focus on ministry.
+
+Secondary User Segment: The Lead/Executive Pastor: The strategic leader who needs a high-level view of congregational health and wants to maximize time spent on ministry, not administration.
+
+Secondary User Segment: The Volunteer Leader/Member: A dedicated but time-poor individual who needs simple, clear tools for scheduling and communication to serve effectively.
+
+Goals & Success Metrics
+Business Objective: For our initial cohort of 10 partner churches, successfully offload at least 30% of their daily administrative tasks using the Fellowship 360 platform within the first 6 months of onboarding, leading to measurable time savings for their staff.
+
+User Success Metrics: A measurable reduction in administrative hours, a higher percentage of successful visitor follow-ups, and positive feedback indicating the system has simplified work and reduced stress.
+
+Key Performance Indicators (KPIs): Average number of Grace interactions per week, new visitor follow-up rate, a target 5-hour per week reduction in admin tasks, >90% weekly user adoption, and an NPS of 50+.
+
+MVP Scope
+Core Features (MVP - Final)
+Grace - AI Executive Assistant:
+
+Intelligent Communication Handling (Inbound):
+
+Acts as an intelligent gatekeeper for calls and texts based on staff-defined rules.
+
+Answers FAQs via voice or text.
+
+Transcribes messages and logs all communications automatically in the CRM.
+
+Proactive Staff Support (Internal & Outbound):
+
+Allows staff to dictate tasks, notes, or initiate outbound texts/emails through Grace.
+
+Compiles and sends a "Daily Digest" email summarizing the day's communications to relevant staff.
+
+Shared Calendar Management:
+
+Manages and schedules appointments based on real-time calendar access and booking rules.
+
+Sends automated SMS confirmations and reminders to all parties.
+
+CRM - Core Functionality:
+
+A centralized contact database.
+
+An integrated activity feed that automatically logs every interaction from Grace.
+
+The ability for staff to manually add notes and assign follow-up tasks.
+
+Out of Scope for MVP
+The 360 Finance Module
+
+The 360 Marketing Module
+
+The 360 Funnels & LMS Module
+
+The 360 Community & Staff Chat Modules
+
+Advanced Grace Automations
+
+Post-MVP Vision
+Phase 2 Features: Launch a companion mobile app (via GoodBarber), introduce the Marketing Module, and develop the Finance Module.
+
+Long-term Vision: Build out the native Community platform, Staff Chat, and the Funnels & LMS modules.
+
+Expansion Opportunities: Explore deeper AI integrations and adapt the platform for other non-profits.
+
+Technical Considerations
+Frontend Framework: Next.js (using React) with Shadcn for UI components.
+
+Backend & Database: Supabase (PostgreSQL), providing a powerful and scalable data layer for the entire ecosystem.
+
+Hosting: Key services like Supabase and n8n will be self-hosted on Hostinger.
+
+Workflow Automation: n8n for handling complex, automated workflows.
+
+Communication Stack: Twilio (Voice), Textbee (SMS), and LiveKit (Real-time).
+
+AI Voice Generation: ElevenLabs.
+
+Mobile Apps: GoodBarber for the member app; a dedicated staff companion app for Grace.
+
+Constraints & Assumptions
+Timeline: A realistic estimate for the MVP is 6-12 weeks.
+
+Budget: TBD.
+
+Assumptions: The chosen tech stack can support the MVP features; the hybrid SaaS/Agency model is compelling; an initial cohort of "Founding Partner" churches can be recruited.
+
+Risks & Open Questions
+Risks: AI adoption hesitancy, technical integration complexity, data security and privacy, and third-party platform dependencies.
+
+Open Questions: Specific security/compliance standards, fallback plan for an iMessage gateway, and concrete methods for measuring time savings.
+
+Go-to-Market Strategy
+The initial strategy will be a high-touch "Founding Partners" program for the first 10 churches, focusing on targeted outreach in niche communities and leveraging early success into powerful case studies for broader marketing.
