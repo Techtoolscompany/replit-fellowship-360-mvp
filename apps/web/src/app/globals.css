@@ -101,11 +101,15 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: oklch(var(--border));
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: oklch(var(--background));
+    color: oklch(var(--foreground));
   }
 }
 

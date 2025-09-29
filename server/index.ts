@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import next from "next";
 
 const app = express();
 app.use(express.json());
@@ -57,17 +58,22 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    log(`Error handled: ${status} - ${message}`);
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
+  // Setup Next.js to serve the Fellowship 360 app from apps/web
+  const isDev = app.get("env") === "development";
+  const nextApp = next({ dev: isDev, dir: './apps/web' });
+  const handle = nextApp.getRequestHandler();
+  
+  log("Preparing Fellowship 360 Next.js app...");
+  await nextApp.prepare();
+  log("Fellowship 360 app ready!");
+  
+  // Serve Fellowship 360 Next.js app for all non-API routes
+  app.all('*', (req, res) => {
+    return handle(req, res);
+  });
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
