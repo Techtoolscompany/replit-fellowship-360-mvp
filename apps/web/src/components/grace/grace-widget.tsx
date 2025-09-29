@@ -6,10 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { MessageCircle, Phone, Minimize2, Maximize2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useAppStore } from '@/lib/store'
 
 export function GraceWidget() {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [isOnline, setIsOnline] = useState(true) // This would be connected to actual Grace status
+  const { graceStatus, graceInteractions } = useAppStore()
+  
+  const isOnline = graceStatus === 'online'
 
   if (!isExpanded) {
     return (
@@ -60,7 +63,7 @@ export function GraceWidget() {
           <div className="bg-muted/50 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Today's Activity</span>
-              <Badge variant="outline">47 interactions</Badge>
+              <Badge variant="outline">{graceInteractions} interactions</Badge>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
