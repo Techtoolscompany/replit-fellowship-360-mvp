@@ -1,7 +1,9 @@
 'use client'
 
 import { useAuth } from '@/lib/auth/context'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 import { 
   Sidebar, 
   SidebarContent, 
@@ -33,23 +35,24 @@ const menuItems = [
   { icon: Users, label: 'Contacts', href: '/contacts' },
   { icon: Megaphone, label: 'Ministries', href: '/ministries' },
   { icon: Calendar, label: 'Events', href: '/events' },
-  { icon: Baby, label: 'Child Check-in', href: '/check-in' },
   { icon: MessageCircle, label: 'Grace Assistant', href: '/grace' },
   { icon: BarChart3, label: 'Reports', href: '/reports' },
 ]
 
-const adminItems = [
-  { icon: UserCog, label: 'Staff Management', href: '/admin/staff' },
-  { icon: Settings, label: 'Church Settings', href: '/admin/settings' },
+// Admin and agency items temporarily disabled until implemented
+const adminItems: typeof menuItems = [
+  // { icon: UserCog, label: 'Staff Management', href: '/admin/staff' },
+  // { icon: Settings, label: 'Church Settings', href: '/admin/settings' },
 ]
 
-const agencyItems = [
-  { icon: Church, label: 'All Churches', href: '/agency/churches' },
-  { icon: BarChart3, label: 'Agency Reports', href: '/agency/reports' },
+const agencyItems: typeof menuItems = [
+  // { icon: Church, label: 'All Churches', href: '/agency/churches' },  
+  // { icon: BarChart3, label: 'Agency Reports', href: '/agency/reports' },
 ]
 
 export function AppSidebar() {
   const { user, signOut } = useAuth()
+  const pathname = usePathname()
 
   if (!user) return null
 
@@ -89,16 +92,28 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarMenu>
-          {getMenuItems().map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton asChild>
-                <Link href={item.href} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors">
-                  <item.icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {getMenuItems().map((item) => {
+            const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton asChild isActive={isActive}>
+                  <Link 
+                    href={item.href as any} 
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                      isActive 
+                        ? "bg-primary text-primary-foreground" 
+                        : "hover:bg-accent"
+                    )}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarContent>
 
