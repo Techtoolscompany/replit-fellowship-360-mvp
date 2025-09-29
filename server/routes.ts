@@ -273,8 +273,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/grace-interactions", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      let churchId = req.body.churchId;
+      
+      // Enforce tenant isolation - non-admins can only create for their own church
+      if (req.user.role !== 'ADMIN') {
+        if (churchId && churchId !== req.user.churchId) {
+          return res.status(403).json({ message: "Cannot create interactions for other churches" });
+        }
+        churchId = req.user.churchId;
+      } else {
+        // Admins must provide a valid churchId
+        if (!churchId) {
+          return res.status(400).json({ message: "churchId is required" });
+        }
+        // Validate churchId exists
+        const church = await storage.getChurch(churchId);
+        if (!church) {
+          return res.status(400).json({ message: "Invalid churchId" });
+        }
+      }
+      
       const interactionData = insertGraceInteractionSchema.parse({
         ...req.body,
+        churchId,
         userId: req.user.id,
       });
       
@@ -320,6 +341,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Integration webhooks
   app.post("/api/webhooks/livekit", async (req, res) => {
     try {
+      // TODO: Add HMAC signature verification for production
+      // const signature = req.headers['x-livekit-signature'];
+      // if (!verifyLiveKitSignature(req.body, signature)) {
+      //   return res.status(401).json({ message: "Invalid signature" });
+      // }
+      
       // Handle LiveKit webhooks for voice/video sessions
       const { event, room, participant } = req.body;
       
@@ -328,14 +355,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Extract churchId from room metadata or participant info
         const churchId = room?.metadata?.churchId;
         if (churchId) {
-          await storage.createGraceInteraction({
-            type: 'VOICE',
-            function: 'Voice Session',
-            description: `LiveKit voice session in room ${room.name}`,
-            status: 'COMPLETED',
-            churchId,
-            metadata: { room, participant, event },
-          });
+          // Validate churchId exists to prevent injection
+          const church = await storage.getChurch(churchId);
+          if (church) {
+            await storage.createGraceInteraction({
+              type: 'VOICE',
+              function: 'Voice Session',
+              description: `LiveKit voice session in room ${room.name}`,
+              status: 'COMPLETED',
+              churchId,
+              metadata: { room, participant, event },
+            });
+          } else {
+            console.warn(`Invalid churchId in LiveKit webhook: ${churchId}`);
+          }
         }
       }
       
@@ -348,18 +381,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/webhooks/calendar", async (req, res) => {
     try {
+      // TODO: Add signature verification for production (Cal.com, Google Calendar)
+      // const signature = req.headers['x-calendar-signature'];
+      // if (!verifyCalendarSignature(req.body, signature)) {
+      //   return res.status(401).json({ message: "Invalid signature" });
+      // }
+      
       // Handle calendar booking webhooks (Cal.com, Google Calendar)
       const { event, booking, churchId } = req.body;
       
       if (churchId) {
-        await storage.createGraceInteraction({
-          type: 'CALENDAR',
-          function: 'Calendar Booking',
-          description: `Calendar event: ${event} - ${booking?.title || 'New booking'}`,
-          status: 'COMPLETED',
-          churchId,
-          metadata: { event, booking },
-        });
+        // Validate churchId exists to prevent injection
+        const church = await storage.getChurch(churchId);
+        if (church) {
+          await storage.createGraceInteraction({
+            type: 'CALENDAR',
+            function: 'Calendar Booking',
+            description: `Calendar event: ${event} - ${booking?.title || 'New booking'}`,
+            status: 'COMPLETED',
+            churchId,
+            metadata: { event, booking },
+          });
+        } else {
+          console.warn(`Invalid churchId in calendar webhook: ${churchId}`);
+        }
       }
       
       res.status(200).json({ received: true });
@@ -371,18 +416,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/webhooks/textbee", async (req, res) => {
     try {
+      // TODO: Add signature verification for production
+      // const signature = req.headers['x-textbee-signature'];
+      // if (!verifyTextBeeSignature(req.body, signature)) {
+      //   return res.status(401).json({ message: "Invalid signature" });
+      // }
+      
       // Handle TextBee SMS webhooks
       const { message, status, churchId } = req.body;
       
       if (churchId) {
-        await storage.createGraceInteraction({
-          type: 'SMS',
-          function: 'SMS Message',
-          description: `TextBee SMS: ${message?.body || 'Message sent'}`,
-          status: status === 'delivered' ? 'COMPLETED' : 'FAILED',
-          churchId,
-          metadata: { message, status },
-        });
+        // Validate churchId exists to prevent injection
+        const church = await storage.getChurch(churchId);
+        if (church) {
+          await storage.createGraceInteraction({
+            type: 'SMS',
+            function: 'SMS Message',
+            description: `TextBee SMS: ${message?.body || 'Message sent'}`,
+            status: status === 'delivered' ? 'COMPLETED' : 'FAILED',
+            churchId,
+            metadata: { message, status },
+          });
+        } else {
+          console.warn(`Invalid churchId in TextBee webhook: ${churchId}`);
+        }
       }
       
       res.status(200).json({ received: true });
@@ -394,18 +451,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/webhooks/n8n", async (req, res) => {
     try {
+      // TODO: Add signature verification for production
+      // const signature = req.headers['x-n8n-signature'];
+      // if (!verifyN8nSignature(req.body, signature)) {
+      //   return res.status(401).json({ message: "Invalid signature" });
+      // }
+      
       // Handle n8n workflow webhooks
       const { workflowId, status, execution, churchId } = req.body;
       
       if (churchId) {
-        await storage.createGraceInteraction({
-          type: 'WORKFLOW',
-          function: 'n8n Workflow',
-          description: `Workflow ${workflowId} ${status}`,
-          status: status === 'success' ? 'COMPLETED' : 'FAILED',
-          churchId,
-          metadata: { workflowId, status, execution },
-        });
+        // Validate churchId exists to prevent injection
+        const church = await storage.getChurch(churchId);
+        if (church) {
+          await storage.createGraceInteraction({
+            type: 'WORKFLOW',
+            function: 'n8n Workflow',
+            description: `Workflow ${workflowId} ${status}`,
+            status: status === 'success' ? 'COMPLETED' : 'FAILED',
+            churchId,
+            metadata: { workflowId, status, execution },
+          });
+        } else {
+          console.warn(`Invalid churchId in n8n webhook: ${churchId}`);
+        }
       }
       
       res.status(200).json({ received: true });
