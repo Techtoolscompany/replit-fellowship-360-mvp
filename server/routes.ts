@@ -339,6 +339,225 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Integration webhooks
+  // Twilio TwiML Routes
+  app.post("/api/twilio/voice-handler", async (req, res) => {
+    try {
+      const { churchId, greeting } = req.query;
+      const twilioService = await import('./services/twilio').then(m => m.getTwilioService());
+      
+      if (!twilioService) {
+        // Fallback TwiML if Twilio not configured
+        const VoiceResponse = (await import('twilio')).twiml.VoiceResponse;
+        const twiml = new VoiceResponse();
+        twiml.say({ voice: 'alice' }, "Thank you for calling. Please try again later.");
+        twiml.hangup();
+        
+        res.type('text/xml');
+        return res.send(twiml.toString());
+      }
+      
+      const twiml = twilioService.generateIncomingCallTwiML(churchId as string, greeting as string);
+      
+      res.type('text/xml');
+      res.send(twiml);
+    } catch (error) {
+      console.error('Voice handler error:', error);
+      res.status(500).send('Error processing voice call');
+    }
+  });
+
+  app.post("/api/twilio/process-speech", async (req, res) => {
+    try {
+      const { SpeechResult, CallSid, From, To, Caller } = req.body;
+      const { churchId } = req.query;
+      
+      const twilioService = await import('./services/twilio').then(m => m.getTwilioService());
+      
+      if (!twilioService || !SpeechResult || !churchId) {
+        const VoiceResponse = (await import('twilio')).twiml.VoiceResponse;
+        const twiml = new VoiceResponse();
+        twiml.say({ voice: 'alice' }, "I'm sorry, I didn't understand. Please try again later.");
+        twiml.hangup();
+        
+        res.type('text/xml');
+        return res.send(twiml.toString());
+      }
+      
+      // Validate churchId
+      const church = await storage.getChurch(churchId as string);
+      if (!church) {
+        console.warn(`Invalid churchId in Twilio call: ${churchId}`);
+        const VoiceResponse = (await import('twilio')).twiml.VoiceResponse;
+        const twiml = new VoiceResponse();
+        twiml.say({ voice: 'alice' }, "Thank you for calling. Please try again later.");
+        twiml.hangup();
+        
+        res.type('text/xml');
+        return res.send(twiml.toString());
+      }
+      
+      // Process Grace's response
+      const { response, shouldContinue } = await twilioService.processGraceResponse(SpeechResult, churchId as string);
+      
+      // Log the interaction
+      await storage.createGraceInteraction({
+        type: 'VOICE',
+        function: 'Phone Call - Grace Response',
+        description: `Caller: ${SpeechResult.substring(0, 100)}... | Grace: ${response.substring(0, 100)}...`,
+        status: 'COMPLETED',
+        churchId: churchId as string,
+        metadata: {
+          callSid: CallSid,
+          from: From,
+          to: To,
+          caller: Caller,
+          speechInput: SpeechResult,
+          graceResponse: response,
+          duration: 0, // Will be updated when call ends
+        },
+      });
+      
+      // Generate TwiML response
+      const twiml = twilioService.generateSpeechResponseTwiML(response, shouldContinue);
+      
+      res.type('text/xml');
+      res.send(twiml);
+    } catch (error) {
+      console.error('Speech processing error:', error);
+      
+      const VoiceResponse = (await import('twilio')).twiml.VoiceResponse;
+      const twiml = new VoiceResponse();
+      twiml.say({ voice: 'alice' }, "I'm sorry, there was an error processing your request. Please try again later.");
+      twiml.hangup();
+      
+      res.type('text/xml');
+      res.send(twiml.toString());
+    }
+  });
+
+  app.post("/api/twilio/call-status", async (req, res) => {
+    try {
+      const { CallSid, CallStatus, CallDuration, From, To } = req.body;
+      const { churchId } = req.query;
+      
+      // Log call completion
+      if (CallStatus === 'completed' && churchId) {
+        const church = await storage.getChurch(churchId as string);
+        if (church) {
+          await storage.createGraceInteraction({
+            type: 'VOICE',
+            function: 'Phone Call - Completed',
+            description: `Call completed: ${From} to ${To} (${CallDuration}s)`,
+            status: 'COMPLETED',
+            responseTime: parseInt(CallDuration) * 1000, // Convert to milliseconds
+            churchId: churchId as string,
+            metadata: {
+              callSid: CallSid,
+              callStatus: CallStatus,
+              callDuration: CallDuration,
+              from: From,
+              to: To,
+            },
+          });
+        }
+      }
+      
+      res.status(200).json({ received: true });
+    } catch (error) {
+      console.error('Call status webhook error:', error);
+      res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
+
+  // Twilio API Routes for frontend
+  app.post("/api/twilio/make-call", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { to, greeting } = req.body;
+      const twilioService = await import('./services/twilio').then(m => m.getTwilioService());
+      
+      if (!twilioService) {
+        return res.status(503).json({ message: "Twilio service not available" });
+      }
+      
+      if (!to) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+      
+      // Use user's church ID for the call
+      const churchId = req.user.churchId;
+      if (!churchId) {
+        return res.status(400).json({ message: "User not associated with a church" });
+      }
+      
+      const callSid = await twilioService.makeCall(to, churchId, greeting);
+      
+      // Log the outbound call initiation
+      await storage.createGraceInteraction({
+        type: 'VOICE',
+        function: 'Outbound Call - Initiated',
+        description: `Outbound call to ${to} initiated by user`,
+        status: 'PENDING',
+        churchId,
+        userId: req.user.id,
+        metadata: {
+          callSid,
+          to,
+          greeting: greeting || 'Default greeting',
+          initiatedBy: req.user.email,
+        },
+      });
+      
+      res.json({ callSid, message: "Call initiated successfully" });
+    } catch (error) {
+      console.error('Make call error:', error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to make call" });
+    }
+  });
+
+  app.post("/api/twilio/send-sms", authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { to, message } = req.body;
+      const twilioService = await import('./services/twilio').then(m => m.getTwilioService());
+      
+      if (!twilioService) {
+        return res.status(503).json({ message: "Twilio service not available" });
+      }
+      
+      if (!to || !message) {
+        return res.status(400).json({ message: "Phone number and message are required" });
+      }
+      
+      // Use user's church ID for the SMS
+      const churchId = req.user.churchId;
+      if (!churchId) {
+        return res.status(400).json({ message: "User not associated with a church" });
+      }
+      
+      const messageSid = await twilioService.sendSMS(to, message);
+      
+      // Log the SMS
+      await storage.createGraceInteraction({
+        type: 'SMS',
+        function: 'SMS - Sent',
+        description: `SMS sent to ${to}: ${message.substring(0, 100)}...`,
+        status: 'COMPLETED',
+        churchId,
+        userId: req.user.id,
+        metadata: {
+          messageSid,
+          to,
+          message,
+          sentBy: req.user.email,
+        },
+      });
+      
+      res.json({ messageSid, message: "SMS sent successfully" });
+    } catch (error) {
+      console.error('Send SMS error:', error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to send SMS" });
+    }
+  });
+
   app.post("/api/webhooks/livekit", async (req, res) => {
     try {
       // TODO: Add HMAC signature verification for production
