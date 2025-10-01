@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -77,7 +78,8 @@ const quickStats = [
 
 export default function ReportsPage() {
   return (
-    <div className="space-y-6" data-testid="reports-page">
+    <AuthenticatedLayout>
+      <div className="space-y-6" data-testid="reports-page">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="page-title">Reports</h1>
@@ -180,6 +182,7 @@ export default function ReportsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   )
 }

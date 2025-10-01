@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,7 +39,8 @@ const recentInteractions = [
 
 export default function GraceAssistantPage() {
   return (
-    <div className="space-y-6" data-testid="grace-page">
+    <AuthenticatedLayout>
+      <div className="space-y-6" data-testid="grace-page">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="page-title">Grace Assistant</h1>
@@ -171,6 +173,7 @@ export default function GraceAssistantPage() {
           </Button>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   )
 }

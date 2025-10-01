@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -76,7 +77,8 @@ const getEventTypeColor = (type: string) => {
 
 export default function EventsPage() {
   return (
-    <div className="space-y-6" data-testid="events-page">
+    <AuthenticatedLayout>
+      <div className="space-y-6" data-testid="events-page">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold" data-testid="page-title">Events</h1>
@@ -145,6 +147,7 @@ export default function EventsPage() {
           </Card>
         ))}
       </div>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   )
 }

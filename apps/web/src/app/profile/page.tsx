@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +20,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6" data-testid="profile-page">
+    <AuthenticatedLayout>
+      <div className="space-y-6" data-testid="profile-page">
       <div>
         <h1 className="text-3xl font-bold" data-testid="page-title">Profile Settings</h1>
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
@@ -180,6 +182,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </AuthenticatedLayout>
   )
 }

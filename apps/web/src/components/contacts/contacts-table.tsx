@@ -37,7 +37,8 @@ export function ContactsTable({ limit = 10 }: ContactsTableProps) {
 
   useEffect(() => {
     if (!user?.churchId || !user.churchId) {
-      // Demo mode - show sample data
+      // Demo mode - show sample data with static timestamps
+      const now = new Date()
       setContacts([
         {
           id: '1',
@@ -46,7 +47,7 @@ export function ContactsTable({ limit = 10 }: ContactsTableProps) {
           email: 'john@example.com',
           phone: '(555) 123-4567',
           status: 'ACTIVE',
-          created_at: new Date().toISOString()
+          created_at: now.toISOString()
         },
         {
           id: '2',
@@ -55,7 +56,7 @@ export function ContactsTable({ limit = 10 }: ContactsTableProps) {
           email: 'sarah@example.com',
           phone: '(555) 987-6543',
           status: 'LEAD',
-          created_at: new Date(Date.now() - 86400000).toISOString()
+          created_at: new Date(now.getTime() - 86400000).toISOString()
         }
       ])
       setLoading(false)

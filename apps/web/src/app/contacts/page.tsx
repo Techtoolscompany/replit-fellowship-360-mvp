@@ -1,5 +1,6 @@
 'use client'
 
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,77 +64,79 @@ const sampleContacts = [
 
 export default function ContactsPage() {
   return (
-    <div className="space-y-6" data-testid="contacts-page">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="page-title">Contacts</h1>
-          <p className="text-muted-foreground">Manage your church members and visitors</p>
+    <AuthenticatedLayout>
+      <div className="space-y-6" data-testid="contacts-page">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold" data-testid="page-title">Contacts</h1>
+            <p className="text-muted-foreground">Manage your church members and visitors</p>
+          </div>
+          <Button data-testid="button-add-contact">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Contact
+          </Button>
         </div>
-        <Button data-testid="button-add-contact">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Contact
-        </Button>
-      </div>
 
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search contacts..." 
-            className="pl-8" 
-            data-testid="input-search-contacts"
-          />
+        <div className="flex items-center space-x-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search contacts..." 
+              className="pl-8" 
+              data-testid="input-search-contacts"
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="grid gap-4">
-        {sampleContacts.map((contact) => (
-          <Card key={contact.id} data-testid={`contact-card-${contact.id}`}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Avatar>
-                    <AvatarImage src="" />
-                    <AvatarFallback>{contact.avatar}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="font-semibold" data-testid={`contact-name-${contact.id}`}>
-                      {contact.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{contact.role}</p>
-                    <div className="flex items-center space-x-4 mt-1 text-sm text-muted-foreground">
-                      <span className="flex items-center">
-                        <Mail className="h-3 w-3 mr-1" />
-                        {contact.email}
-                      </span>
-                      <span className="flex items-center">
-                        <Phone className="h-3 w-3 mr-1" />
-                        {contact.phone}
-                      </span>
+        <div className="grid gap-4">
+          {sampleContacts.map((contact) => (
+            <Card key={contact.id} data-testid={`contact-card-${contact.id}`}>
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center space-x-4">
+                    <Avatar>
+                      <AvatarImage src="" />
+                      <AvatarFallback>{contact.avatar}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold truncate" data-testid={`contact-name-${contact.id}`}>
+                        {contact.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">{contact.role}</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-1 text-sm text-muted-foreground">
+                        <span className="flex items-center truncate">
+                          <Mail className="h-3 w-3 mr-1 flex-shrink-0" />
+                          <span className="truncate">{contact.email}</span>
+                        </span>
+                        <span className="flex items-center truncate">
+                          <Phone className="h-3 w-3 mr-1 flex-shrink-0" />
+                          <span className="truncate">{contact.phone}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between sm:justify-end space-x-2">
+                    <Badge 
+                      variant={contact.status === 'Active' ? 'default' : contact.status === 'New Member' ? 'secondary' : 'outline'}
+                      data-testid={`contact-status-${contact.id}`}
+                    >
+                      {contact.status}
+                    </Badge>
+                    <div className="flex space-x-1">
+                      <Button size="sm" variant="outline" data-testid={`button-call-${contact.id}`}>
+                        <Phone className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" data-testid={`button-message-${contact.id}`}>
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Badge 
-                    variant={contact.status === 'Active' ? 'default' : contact.status === 'New Member' ? 'secondary' : 'outline'}
-                    data-testid={`contact-status-${contact.id}`}
-                  >
-                    {contact.status}
-                  </Badge>
-                  <div className="flex space-x-1">
-                    <Button size="sm" variant="outline" data-testid={`button-call-${contact.id}`}>
-                      <Phone className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" data-testid={`button-message-${contact.id}`}>
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
+    </AuthenticatedLayout>
   )
 }

@@ -30,3 +30,4 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
     </AppShell>
   )
 }
+

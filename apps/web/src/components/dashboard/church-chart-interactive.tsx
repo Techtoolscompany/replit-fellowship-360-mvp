@@ -102,10 +102,10 @@ export function ChurchChartInteractive() {
           <div>
             <CardTitle>Church Attendance & Visitors</CardTitle>
             <CardDescription>
-              <span className="hidden @[540px]/card:block">
+              <span className="hidden sm:block">
                 Weekly attendance and visitor trends
               </span>
-              <span className="@[540px]/card:hidden">Weekly trends</span>
+              <span className="sm:hidden">Weekly trends</span>
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export function ChurchChartInteractive() {
             value={timeRange}
             onValueChange={setTimeRange}
             variant="outline"
-            className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
+            className="hidden sm:flex *:data-[slot=toggle-group-item]:!px-4"
           >
             <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
             <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>

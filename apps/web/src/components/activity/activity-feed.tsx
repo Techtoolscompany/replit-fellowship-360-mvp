@@ -41,7 +41,8 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
 
   useEffect(() => {
     if (!user?.churchId || !user.churchId) {
-      // Demo mode - show sample data
+      // Demo mode - show sample data with static timestamps
+      const now = new Date()
       setActivities([
         {
           id: '1',
@@ -49,7 +50,7 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
           title: 'Answered service time inquiry',
           description: 'Grace provided Sunday service schedule information',
           status: 'COMPLETED',
-          occurred_at: new Date(Date.now() - 120000).toISOString(), // 2 minutes ago
+          occurred_at: new Date(now.getTime() - 120000).toISOString(), // 2 minutes ago
           contacts: { first_name: 'John', last_name: 'Smith' }
         },
         {
@@ -58,7 +59,7 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
           title: 'Prayer request received',
           description: 'Forwarded prayer request to pastoral team',
           status: 'COMPLETED',
-          occurred_at: new Date(Date.now() - 900000).toISOString(), // 15 minutes ago
+          occurred_at: new Date(now.getTime() - 900000).toISOString(), // 15 minutes ago
           contacts: { first_name: 'Mary', last_name: 'Johnson' }
         },
         {
@@ -67,7 +68,7 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
           title: 'Appointment scheduled',
           description: 'Counseling session booked for next Tuesday',
           status: 'PENDING',
-          occurred_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+          occurred_at: new Date(now.getTime() - 3600000).toISOString(), // 1 hour ago
           contacts: { first_name: 'David', last_name: 'Williams' }
         }
       ])

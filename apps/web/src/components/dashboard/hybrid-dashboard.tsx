@@ -16,7 +16,7 @@ export default function HybridDashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
+      <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 sm:p-6">
         <h2 className="text-2xl font-bold mb-2">
           Welcome back, {user.firstName}!
         </h2>
@@ -32,7 +32,7 @@ export default function HybridDashboard() {
       <ChurchChartInteractive />
       
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Recent Contacts */}
         <div className="lg:col-span-2">
           <Card>
