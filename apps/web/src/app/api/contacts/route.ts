@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import jwt from 'jsonwebtoken'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-const JWT_SECRET = process.env.SESSION_SECRET || 'fallback-secret'
 
 const contactSchema = z.object({
   firstName: z.string().min(1),
@@ -27,29 +19,16 @@ const contactSchema = z.object({
   assignedToUserId: z.string().optional(),
 })
 
-// Helper function to verify JWT token
-async function verifyToken(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  const token = authHeader?.split(' ')[1]
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any
-    return decoded
-  } catch (error) {
-    return null
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    if (!user) {
+    const supabase = await createClient()
+    
+    // Get authenticated user from Supabase session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
       return NextResponse.json(
-        { message: 'Access token required' },
+        { message: 'Unauthorized' },
         { status: 401 }
       )
     }
@@ -57,7 +36,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const churchId = searchParams.get('churchId')
 
-    // Validate church access
     if (!churchId) {
       return NextResponse.json(
         { message: 'churchId is required' },
@@ -65,13 +43,22 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    if (user.role !== 'ADMIN' && user.churchId !== churchId) {
+    // Get user's profile to check church access
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role, church_id')
+      .eq('id', user.id)
+      .single()
+
+    // Check if user has access to this church
+    if (userProfile?.role !== 'AGENCY' && userProfile?.church_id !== churchId) {
       return NextResponse.json(
         { message: 'Access denied' },
         { status: 403 }
       )
     }
 
+    // Fetch contacts - RLS policies will enforce additional security
     const { data: contacts, error } = await supabase
       .from('contacts')
       .select(`
@@ -102,10 +89,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    if (!user) {
+    const supabase = await createClient()
+    
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
       return NextResponse.json(
-        { message: 'Access token required' },
+        { message: 'Unauthorized' },
         { status: 401 }
       )
     }
@@ -113,7 +104,6 @@ export async function POST(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const churchId = searchParams.get('churchId')
 
-    // Validate church access
     if (!churchId) {
       return NextResponse.json(
         { message: 'churchId is required' },
@@ -121,7 +111,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (user.role !== 'ADMIN' && user.churchId !== churchId) {
+    // Get user's profile to check church access
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role, church_id')
+      .eq('id', user.id)
+      .single()
+
+    if (userProfile?.role !== 'AGENCY' && userProfile?.church_id !== churchId) {
       return NextResponse.json(
         { message: 'Access denied' },
         { status: 403 }

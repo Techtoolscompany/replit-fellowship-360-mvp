@@ -73,42 +73,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Get user profile from our users table
       const { data: userProfile, error } = await supabase
         .from('users')
-        .select(`
-          id,
-          email,
-          first_name,
-          last_name,
-          role,
-          church_id,
-          church:churches!church_id (
-            id,
-            name,
-            email
-          )
-        `)
+        .select('id, email, first_name, last_name, role, church_id')
         .eq('id', supabaseUser.id)
-        .single()
+        .maybeSingle()
 
       if (error) {
-        console.error('Error loading user profile:', error)
+        console.error('Error loading user profile:', error.message ?? error, error)
         setUser(null)
-      } else if (userProfile) {
-        setUser({
-          id: userProfile.id,
-          email: userProfile.email,
-          firstName: userProfile.first_name,
-          lastName: userProfile.last_name,
-          role: userProfile.role,
-          churchId: userProfile.church_id,
-          church: userProfile.church ? {
-            id: userProfile.church.id,
-            name: userProfile.church.name,
-            email: userProfile.church.email,
-          } : undefined,
-        })
+        return
       }
+
+      if (!userProfile) {
+        const metadata = (supabaseUser.user_metadata ?? {}) as {
+          first_name?: string
+          last_name?: string
+          firstName?: string
+          lastName?: string
+          role?: User['role']
+        }
+
+        setUser({
+          id: supabaseUser.id,
+          email: supabaseUser.email || '',
+          firstName:
+            metadata.first_name ??
+            metadata.firstName ??
+            supabaseUser.email?.split('@')[0] ??
+            'User',
+          lastName: metadata.last_name ?? metadata.lastName ?? '',
+          role: metadata.role ?? 'STAFF',
+          churchId: null,
+        })
+        return
+      }
+
+      // Fetch church data separately if user has a church
+      let church = undefined
+      if (userProfile.church_id) {
+        const { data: churchData, error: churchError } = await supabase
+          .from('churches')
+          .select('id, name, email')
+          .eq('id', userProfile.church_id)
+          .single()
+
+        if (!churchError && churchData) {
+          church = {
+            id: churchData.id,
+            name: churchData.name,
+            email: churchData.email,
+          }
+        }
+      }
+
+      setUser({
+        id: userProfile.id,
+        email: userProfile.email,
+        firstName: userProfile.first_name,
+        lastName: userProfile.last_name,
+        role: userProfile.role,
+        churchId: userProfile.church_id,
+        church,
+      })
     } catch (error) {
-      console.error('Error in loadUserProfile:', error)
+      console.error(
+        'Error in loadUserProfile:',
+        error instanceof Error ? error.message : error,
+        error
+      )
       setUser(null)
     } finally {
       setLoading(false)

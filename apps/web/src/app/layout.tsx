@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: 'AI-powered church management platform with Grace assistant - offloading administrative tasks to focus on ministry',
 }
 
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({
   children,
 }: {

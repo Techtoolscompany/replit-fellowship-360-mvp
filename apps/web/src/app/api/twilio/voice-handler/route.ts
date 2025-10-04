@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { VoiceResponse } from 'twilio'
+import twilio from 'twilio'
 
+const VoiceResponse = twilio.twiml.VoiceResponse
+
+// Use service role for Twilio webhooks (no user session)
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
     
     // Gather speech input
     const gather = twiml.gather({
-      input: 'speech',
+      input: ['speech'],
       action: `/api/twilio/process-speech?churchId=${churchId}`,
       speechTimeout: 'auto',
       timeout: 10,

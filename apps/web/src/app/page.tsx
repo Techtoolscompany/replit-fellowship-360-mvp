@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic';
+
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { Dashboard } from '@/components/dashboard/dashboard'
 

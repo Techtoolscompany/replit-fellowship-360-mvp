@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useLayoutEffect } from "react";
 import { Bell, User, Moon, Sun, Users, MessageCircle } from "lucide-react";
+import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth/context';
 import { usePathname } from 'next/navigation';
 import { ChurchChartInteractive } from "@/components/dashboard/church-chart-interactive";
@@ -8,7 +9,6 @@ import { ChurchSectionCards } from "@/components/dashboard/church-section-cards"
 import { ContactsTable } from "@/components/contacts/contacts-table";
 import { ActivityFeed } from "@/components/activity/activity-feed";
 import { GraceWidget } from "@/components/grace/grace-widget";
-import { BackgroundGradient } from "@/components/ui/background-gradient";
 
 export const FellowshipDashboard = () => {
   const { user } = useAuth();
@@ -34,6 +34,48 @@ export const FellowshipDashboard = () => {
       localStorage.setItem('fellowship-theme', 'light');
     }
   }, [isDark]);
+
+  // Animation variants matching card-22 exactly
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.05,
+      },
+    },
+  }
+
+  const cardVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 20,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        staggerChildren: 0.06,
+      },
+    },
+  }
+
+  const contentVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        staggerChildren: 0.06,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0 },
+  }
 
   if (!user) return null;
 
@@ -71,69 +113,117 @@ export const FellowshipDashboard = () => {
       <ChurchSectionCards />
       
       {/* Chart */}
-      <BackgroundGradient>
-        <ChurchChartInteractive />
-      </BackgroundGradient>
+      <ChurchChartInteractive />
       
       {/* Main Content Grid - 3 Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <motion.div
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Recent Contacts */}
-        <BackgroundGradient containerClassName="h-full" className="rounded-[22px] p-6 bg-card h-full flex flex-col" isSelected={pathname === '/contacts'}>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Users className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold text-card-foreground">Recent Contacts</h3>
-            </div>
-            <a href="/contacts" className="text-sm text-primary hover:text-primary/80 font-medium">
-              View all
-            </a>
-          </div>
-          <div className="flex-1">
-            <ContactsTable limit={5} />
-          </div>
-        </BackgroundGradient>
+        <motion.div variants={cardVariants} className="h-full">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.25 }}
+            variants={contentVariants}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: '0px 10px 30px -5px hsl(var(--foreground) / 0.1)',
+              transition: { type: 'spring', stiffness: 300, damping: 20 }
+            }}
+            className="rounded-2xl border bg-card text-card-foreground shadow-lg cursor-pointer p-6 h-full flex flex-col overflow-hidden"
+          >
+            <motion.div variants={contentVariants} className="space-y-6 flex-1">
+              <motion.div variants={itemVariants} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-card-foreground">Recent Contacts</h3>
+                </div>
+                <a href="/contacts" className="text-sm text-primary hover:text-primary/80 font-medium">
+                  View all
+                </a>
+              </motion.div>
+              <motion.div variants={itemVariants} className="flex-1">
+                <ContactsTable limit={5} />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Activity Feed */}
-        <BackgroundGradient containerClassName="h-full" className="rounded-[22px] p-6 bg-card h-full flex flex-col" isSelected={pathname === '/activity'}>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Bell className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold text-card-foreground">Recent Activity</h3>
-            </div>
-            <a href="/activity" className="text-sm text-primary hover:text-primary/80 font-medium">
-              View all
-            </a>
-          </div>
-          <div className="flex-1">
-            <ActivityFeed limit={8} />
-          </div>
-        </BackgroundGradient>
+        <motion.div variants={cardVariants} className="h-full">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.25 }}
+            variants={contentVariants}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: '0px 10px 30px -5px hsl(var(--foreground) / 0.1)',
+              transition: { type: 'spring', stiffness: 300, damping: 20 }
+            }}
+            className="rounded-2xl border bg-card text-card-foreground shadow-lg cursor-pointer p-6 h-full flex flex-col overflow-hidden"
+          >
+            <motion.div variants={contentVariants} className="space-y-6 flex-1">
+              <motion.div variants={itemVariants} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Bell className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-card-foreground">Recent Activity</h3>
+                </div>
+                <a href="/activity" className="text-sm text-primary hover:text-primary/80 font-medium">
+                  View all
+                </a>
+              </motion.div>
+              <motion.div variants={itemVariants} className="flex-1">
+                <ActivityFeed limit={8} />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Grace Widget */}
-        <BackgroundGradient containerClassName="h-full" className="rounded-[22px] p-6 bg-card h-full flex flex-col" isSelected={pathname === '/grace'}>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <MessageCircle className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold text-card-foreground">Grace Assistant</h3>
-            </div>
-            <a href="/grace" className="text-sm text-primary hover:text-primary/80 font-medium">
-              Open Dashboard
-            </a>
-          </div>
-          <div className="flex-1">
-            <GraceWidget />
-          </div>
-        </BackgroundGradient>
-      </div>
+        <motion.div variants={cardVariants} className="h-full">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.25 }}
+            variants={contentVariants}
+            whileHover={{ 
+              scale: 1.03, 
+              boxShadow: '0px 10px 30px -5px hsl(var(--foreground) / 0.1)',
+              transition: { type: 'spring', stiffness: 300, damping: 20 }
+            }}
+            className="rounded-2xl border bg-card text-card-foreground shadow-lg cursor-pointer p-6 h-full flex flex-col overflow-hidden"
+          >
+            <motion.div variants={contentVariants} className="space-y-6 flex-1">
+              <motion.div variants={itemVariants} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <MessageCircle className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-card-foreground">Grace Assistant</h3>
+                </div>
+                <a href="/grace" className="text-sm text-primary hover:text-primary/80 font-medium">
+                  Open Dashboard
+                </a>
+              </motion.div>
+              <motion.div variants={itemVariants} className="flex-1">
+                <GraceWidget />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
-
-
-export default FellowshipDashboard;

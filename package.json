@@ -8,7 +8,11 @@
     "build": "cd apps/web && npm run build",
     "start": "cd apps/web && npm run start",
     "check": "cd apps/web && npm run lint",
-    "db:push": "drizzle-kit push"
+    "migrate:users": "tsx scripts/migrate-users-to-supabase-auth.ts",
+    "migrate:send-resets": "tsx scripts/migrate-users-to-supabase-auth.ts send-resets",
+    "create-test-user": "tsx scripts/create-test-user.ts",
+    "create:dummy-users": "tsx scripts/create-dummy-users.ts",
+    "setup": "chmod +x setup.sh && ./setup.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -52,8 +56,7 @@
     "cmdk": "^1.1.1",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
-    "drizzle-orm": "^0.39.1",
-    "drizzle-zod": "^0.7.0",
+    "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "eslint-config-next": "^15.5.4",
     "express": "^4.21.2",
@@ -103,7 +106,6 @@
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.21",
-    "drizzle-kit": "^0.31.4",
     "esbuild": "^0.25.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",

@@ -27,7 +27,7 @@ interface ActivityItem {
   contacts?: {
     first_name: string
     last_name: string
-  } | null
+  }[] | null
 }
 
 interface ActivityFeedProps {
@@ -51,7 +51,7 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
           description: 'Grace provided Sunday service schedule information',
           status: 'COMPLETED',
           occurred_at: new Date(now.getTime() - 120000).toISOString(), // 2 minutes ago
-          contacts: { first_name: 'John', last_name: 'Smith' }
+          contacts: [{ first_name: 'John', last_name: 'Smith' }]
         },
         {
           id: '2',
@@ -60,7 +60,7 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
           description: 'Forwarded prayer request to pastoral team',
           status: 'COMPLETED',
           occurred_at: new Date(now.getTime() - 900000).toISOString(), // 15 minutes ago
-          contacts: { first_name: 'Mary', last_name: 'Johnson' }
+          contacts: [{ first_name: 'Mary', last_name: 'Johnson' }]
         },
         {
           id: '3',
@@ -69,7 +69,7 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
           description: 'Counseling session booked for next Tuesday',
           status: 'PENDING',
           occurred_at: new Date(now.getTime() - 3600000).toISOString(), // 1 hour ago
-          contacts: { first_name: 'David', last_name: 'Williams' }
+          contacts: [{ first_name: 'David', last_name: 'Williams' }]
         }
       ])
       setLoading(false)
@@ -217,9 +217,9 @@ export function ActivityFeed({ limit = 10 }: ActivityFeedProps) {
                 )}
                 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {activity.contacts && (
+                  {activity.contacts && activity.contacts.length > 0 && (
                     <span>
-                      {activity.contacts.first_name} {activity.contacts.last_name}
+                      {activity.contacts[0].first_name} {activity.contacts[0].last_name}
                     </span>
                   )}
                   <span>•</span>

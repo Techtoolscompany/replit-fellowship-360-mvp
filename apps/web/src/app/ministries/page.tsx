@@ -1,11 +1,10 @@
 'use client'
 
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Plus, Users, Calendar, MapPin } from "lucide-react"
+import { PlaceCard } from "@/components/ui/card-22"
+import { Plus } from "lucide-react"
+import { motion } from 'framer-motion'
 
 const sampleMinistries = [
   {
@@ -16,7 +15,14 @@ const sampleMinistries = [
     members: 12,
     nextMeeting: "Sunday 9:00 AM",
     location: "Main Sanctuary",
-    status: "Active"
+    status: "Active",
+    images: [
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=2940&auto=format&fit=crop'
+    ],
+    tags: ['Music', 'Worship', 'Community'],
+    rating: 4.9
   },
   {
     id: 2,
@@ -26,7 +32,14 @@ const sampleMinistries = [
     members: 25,
     nextMeeting: "Friday 7:00 PM",
     location: "Youth Center",
-    status: "Active"
+    status: "Active",
+    images: [
+      'https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2940&auto=format&fit=crop'
+    ],
+    tags: ['Youth', 'Faith', 'Growth'],
+    rating: 4.7
   },
   {
     id: 3,
@@ -36,7 +49,14 @@ const sampleMinistries = [
     members: 18,
     nextMeeting: "Sunday 10:30 AM",
     location: "Children's Wing",
-    status: "Active"
+    status: "Active",
+    images: [
+      'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=2940&auto=format&fit=crop'
+    ],
+    tags: ['Children', 'Education', 'Fun'],
+    rating: 4.8
   },
   {
     id: 4,
@@ -46,80 +66,81 @@ const sampleMinistries = [
     members: 8,
     nextMeeting: "Saturday 9:00 AM",
     location: "Community Center",
-    status: "Planning"
+    status: "Planning",
+    images: [
+      'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2940&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=2940&auto=format&fit=crop'
+    ],
+    tags: ['Community', 'Service', 'Outreach'],
+    rating: 4.6
   }
 ]
 
 export default function MinistriesPage() {
+  // Animation variants matching card-22 exactly
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.05,
+      },
+    },
+  }
+
+  const cardVariants = {
+    hidden: {
+      opacity: 0,
+      y: 16,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+    },
+  }
+
   return (
     <AuthenticatedLayout>
       <div className="space-y-6" data-testid="ministries-page">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="page-title">Ministries</h1>
-          <p className="text-muted-foreground">Manage church ministries and teams</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold" data-testid="page-title">Ministries</h1>
+            <p className="text-muted-foreground">Manage church ministries and teams</p>
+          </div>
+          <Button data-testid="button-add-ministry">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Ministry
+          </Button>
         </div>
-        <Button data-testid="button-add-ministry">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Ministry
-        </Button>
-      </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {sampleMinistries.map((ministry) => (
-          <Card key={ministry.id} data-testid={`ministry-card-${ministry.id}`}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle data-testid={`ministry-name-${ministry.id}`}>
-                  {ministry.name}
-                </CardTitle>
-                <Badge 
-                  variant={ministry.status === 'Active' ? 'default' : 'secondary'}
-                  data-testid={`ministry-status-${ministry.id}`}
-                >
-                  {ministry.status}
-                </Badge>
-              </div>
-              <CardDescription>{ministry.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback>{ministry.leader.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-medium">Led by {ministry.leader}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground">
-                <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-2" />
-                  {ministry.members} members
-                </div>
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  {ministry.nextMeeting}
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  {ministry.location}
-                </div>
-              </div>
-
-              <div className="flex space-x-2">
-                <Button size="sm" variant="outline" data-testid={`button-edit-${ministry.id}`}>
-                  Edit
-                </Button>
-                <Button size="sm" variant="outline" data-testid={`button-members-${ministry.id}`}>
-                  View Members
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        <motion.div 
+          className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {sampleMinistries.map((ministry) => (
+            <motion.div key={ministry.id} variants={cardVariants}>
+              <PlaceCard
+                title={ministry.name}
+                description={ministry.description}
+                images={ministry.images}
+                tags={ministry.tags}
+                rating={ministry.rating}
+                schedule={ministry.nextMeeting}
+                leader={ministry.leader}
+                location={ministry.location}
+                statusLabel={ministry.status}
+                statValue={ministry.members}
+                statLabel="members"
+                actionLabel="Manage ministry"
+                data-testid={`ministry-card-${ministry.id}`}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </AuthenticatedLayout>
   )

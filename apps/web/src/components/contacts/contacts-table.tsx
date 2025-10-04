@@ -155,7 +155,7 @@ export function ContactsTable({ limit = 10 }: ContactsTableProps) {
         </TableHeader>
         <TableBody>
           {contacts.map((contact) => (
-            <TableRow key={contact.id}>
+            <TableRow key={contact.id} className="hover:bg-muted/50 transition-all duration-200 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:scale-[1.01]">
               <TableCell className="font-medium">
                 {contact.first_name} {contact.last_name}
               </TableCell>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/lib/auth/context'
-import FellowshipDashboard from './fellowship-dashboard'
+import { FellowshipDashboard } from './fellowship-dashboard'
 
 export function Dashboard() {
   const { user } = useAuth()

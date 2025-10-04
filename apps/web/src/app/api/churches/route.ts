@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import jwt from 'jsonwebtoken'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-const JWT_SECRET = process.env.SESSION_SECRET || 'fallback-secret'
 
 const churchSchema = z.object({
   name: z.string().min(1),
@@ -26,44 +18,38 @@ const churchSchema = z.object({
   gracePhone: z.string().optional(),
 })
 
-// Helper function to verify JWT token
-async function verifyToken(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  const token = authHeader?.split(' ')[1]
-
-  if (!token) {
-    return null
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any
-    return decoded
-  } catch (error) {
-    return null
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    if (!user) {
+    const supabase = await createClient()
+    
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
       return NextResponse.json(
-        { message: 'Access token required' },
+        { message: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Admin can see all churches, others only see their own
+    // Get user's profile to check role
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role, church_id')
+      .eq('id', user.id)
+      .single()
+
+    // Agency users can see all churches, others only see their own
     let query = supabase.from('churches').select('*')
     
-    if (user.role !== 'ADMIN') {
-      if (!user.churchId) {
+    if (userProfile?.role !== 'AGENCY') {
+      if (!userProfile?.church_id) {
         return NextResponse.json(
           { message: 'No church access' },
           { status: 403 }
         )
       }
-      query = query.eq('id', user.churchId)
+      query = query.eq('id', userProfile.church_id)
     }
 
     const { data: churches, error } = await query
@@ -89,18 +75,29 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await verifyToken(request)
-    if (!user) {
+    const supabase = await createClient()
+    
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
       return NextResponse.json(
-        { message: 'Access token required' },
+        { message: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    // Only admins can create churches
-    if (user.role !== 'ADMIN') {
+    // Get user's profile to check role
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    // Only agency users can create churches
+    if (userProfile?.role !== 'AGENCY') {
       return NextResponse.json(
-        { message: 'Admin access required' },
+        { message: 'Agency access required' },
         { status: 403 }
       )
     }
@@ -110,7 +107,16 @@ export async function POST(request: NextRequest) {
 
     const { data: church, error } = await supabase
       .from('churches')
-      .insert(churchData)
+      .insert({
+        name: churchData.name,
+        email: churchData.email,
+        phone: churchData.phone,
+        address: churchData.address,
+        website: churchData.website,
+        timezone: churchData.timezone,
+        settings: churchData.settings,
+        grace_phone: churchData.gracePhone,
+      })
       .select()
       .single()
 
